@@ -1,6 +1,6 @@
 {
   "name": "tele-cloud",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "File server with Telegram storage backend for hosting large files",
   "main": "node_server.js",
   "type": "module",
