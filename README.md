@@ -127,7 +127,7 @@ DELETE /:fileId
 ### Architecture Overview
 
 1. **Upload Process**:
-   - Client divides file into 5MB chunks
+   - Client divides file into 10MB chunks
    - Server stores each chunk on Telegram
    - File metadata and chunk IDs are stored locally
    - Unique deletion token is generated on completion
@@ -166,7 +166,7 @@ The included Docker configuration offers:
 
 ```javascript
 async function uploadFile(file) {
-  const chunkSize = 5 * 1024 * 1024; // 5MB
+  const chunkSize = 50 * 1024 * 1024; // 10MB
   const fileId = generateRandomId();
   const totalChunks = Math.ceil(file.size / chunkSize);
   let deleteToken = null;
@@ -224,7 +224,7 @@ async function deleteFile(fileId, deleteToken) {
 ## ⚠️ Limitations
 
 - Maximum chunk size is 50MB (Telegram Bot API limit)
-- Default chunk size is set to 5MB
+- Default chunk size is set to 10MB
 - Metadata is stored locally, not on Telegram
 - No built-in authentication for uploads/downloads
 - Telegram rate limits may apply for heavy usage
