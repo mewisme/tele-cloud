@@ -1,0 +1,49 @@
+{
+  "name": "tele-cloud",
+  "version": "1.0.0",
+  "description": "File server with Telegram storage backend for hosting large files",
+  "main": "node_server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node node_server.js",
+    "dev": "nodemon node_server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mewisme/tele-cloud.git"
+  },
+  "keywords": [
+    "file-server",
+    "telegram",
+    "storage",
+    "chunks",
+    "upload",
+    "download",
+    "streaming"
+  ],
+  "author": {
+    "name": "Nguyen Mau Minh",
+    "email": "mauminh.nguyen@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mewisme/tele-cloud/issues"
+  },
+  "homepage": "https://github.com/mewisme/tele-cloud#readme",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^5.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "form-data": "^4.0.0",
+    "mime-types": "^2.1.35",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
