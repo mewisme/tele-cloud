@@ -16,8 +16,8 @@ import { randomBytes } from 'crypto';
 
 // Setup constants
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RANGE_SIZE = 5242880; // 5 MB
-const CHUNK_SIZE = 5242880; // 5 MB
+const RANGE_SIZE = 10485760; // 10 MB
+const CHUNK_SIZE = 10485760; // 10 MB
 const METADATA_DIR = path.join(__dirname, 'metadata');
 
 // ============ LOGGER UTILITY ============
@@ -36,7 +36,7 @@ const logger = {
     } else if (seconds === 0) {
       return `${(nanoseconds / 1000000).toFixed(1)}ms`;
     } else {
-      return `${seconds + nanoseconds / 1e9}s`;
+      return `${(seconds + nanoseconds / 1e9).toFixed(1)}s`;
     }
   },
 
@@ -112,7 +112,7 @@ const logger = {
     const formattedTime = chalk.cyan(responseTime);
     const formattedError = errorMessage ? chalk.red(` | ${errorMessage}`) : '';
 
-    console.log(`${this.formatLogLevel(method, this.colorMethod(method))}${formattedTime} | ${status} | ${formattedIp} | ${url}${formattedError}`);
+    console.log(`${this.formatLogLevel(method, this.colorMethod(method))} ${formattedTime} | ${status} | ${formattedIp} | ${url}${formattedError}`);
   },
 
   keepalive(uptime) {
