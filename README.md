@@ -108,6 +108,7 @@ POST /u
 | `fileId` | String | Unique file identifier |
 | `fileName` | String | Original filename |
 | `fileSize` | Number | Total file size in bytes |
+| `chunkSize` | Number | Size of each chunk in bytes |
 | `chunkIndex` | Number | Current chunk index (0-based) |
 | `totalChunks` | Number | Total number of chunks |
 
@@ -118,7 +119,9 @@ POST /u
   "fileId": "abc123",
   "done": true,
   "fileName": "example.pdf",
-  "totalChunks": 10,
+  "fileSize": 10485760,
+  "chunkSize": 5242880,
+  "totalChunks": 2,
   "deleteToken": "f58a09b27c5e9d3e4c6f..."
 }
 ```
@@ -185,7 +188,7 @@ The included Docker configuration offers:
 
 ```javascript
 async function uploadFile(file) {
-  const chunkSize = 10 * 1024 * 1024; // 10MB
+  const chunkSize = 5 * 1024 * 1024; // 5MB
   const fileId = generateRandomId();
   const totalChunks = Math.ceil(file.size / chunkSize);
   let deleteToken = null;
@@ -198,6 +201,7 @@ async function uploadFile(file) {
     formData.append('fileId', fileId);
     formData.append('fileName', file.name);
     formData.append('fileSize', file.size);
+    formData.append('chunkSize', chunkSize);
     formData.append('chunkIndex', i);
     formData.append('totalChunks', totalChunks);
     
@@ -243,7 +247,7 @@ async function deleteFile(fileId, deleteToken) {
 ## ⚠️ Limitations
 
 - Maximum chunk size is 50MB (Telegram Bot API limit)
-- Default chunk size is set to 10MB
+- Chunk size can be set to any value between 1MB and 50MB from the client side
 - Metadata is stored locally, not on Telegram
 - No built-in authentication for uploads/downloads
 - Telegram rate limits may apply for heavy usage

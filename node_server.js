@@ -16,8 +16,6 @@ import { randomBytes } from 'crypto';
 
 // Setup constants
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const RANGE_SIZE = 10485760; // 10 MB
-const CHUNK_SIZE = 10485760; // 10 MB
 const METADATA_DIR = path.join(__dirname, 'metadata');
 
 // ============ LOGGER UTILITY ============
@@ -288,15 +286,20 @@ app.get("/health", (req, res) => {
 app.post("/u", multer().single("chunk"), async (req, res) => {
   try {
     const chunk = req.file;
-    let { fileId, fileName, fileSize, chunkIndex, totalChunks } = req.body;
+    let { fileId, fileName, fileSize, chunkIndex, chunkSize, totalChunks } = req.body;
 
-    if (!chunk || !fileId || !fileName || !fileSize || !chunkIndex || !totalChunks) {
+    if (!chunk || !fileId || !fileName || !fileSize || !chunkIndex || !chunkSize || !totalChunks) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
     chunkIndex = parseInt(chunkIndex, 10);
+    chunkSize = parseInt(chunkSize, 10);
     totalChunks = parseInt(totalChunks, 10);
     fileSize = parseInt(fileSize, 10);
+
+    if (chunkSize < 1024 * 1024 || chunkSize > 50 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Chunk size must be between 1MB and 50MB', chunk_size: chunkSize, chunk_size_in_bytes: chunkSize * 1024 * 1024 });
+    }
 
     const metadataFilePath = path.join(METADATA_DIR, `${fileId}.json`);
 
@@ -313,14 +316,15 @@ app.post("/u", multer().single("chunk"), async (req, res) => {
     } else {
       // Create new metadata file if it doesn't exist
       fs.writeFileSync(metadataFilePath, JSON.stringify({
-        fileId,
         done: false,
+        fileId,
         fileName: formatFileName(fileName, false),
         fileSize,
+        chunkSize,
         totalChunks,
         deleteToken: null,
         fileIds: [],
-      }, null, 2));
+      }));
     }
 
     const metadataFile = fs.readFileSync(metadataFilePath, 'utf8');
@@ -337,7 +341,7 @@ app.post("/u", multer().single("chunk"), async (req, res) => {
       metadata.deleteToken = generateDeleteToken();
     }
 
-    fs.writeFileSync(metadataFilePath, JSON.stringify(metadata, null, 2));
+    fs.writeFileSync(metadataFilePath, JSON.stringify(metadata));
 
     if (chunkIndex === totalChunks - 1) {
       return res.json({
@@ -431,7 +435,7 @@ app.get("/:fileId", async (req, res) => {
     const rangeStr = req.headers.range;
     const start = rangeStr ? parseInt(rangeStr.split("=")[1].split("-")[0], 10) : null;
     const end = rangeStr && start !== null ?
-      Math.min(start + RANGE_SIZE, metadata.fileSize - 1) :
+      Math.min(start + metadata.chunkSize, metadata.fileSize - 1) :
       null;
 
     const partsToDownload = (() => {
@@ -439,14 +443,14 @@ app.get("/:fileId", async (req, res) => {
         return urls.map((url) => ({ url }));
       }
 
-      const startPartNumber = Math.floor(start / CHUNK_SIZE);
-      const endPartNumber = Math.ceil(end / CHUNK_SIZE);
+      const startPartNumber = Math.floor(start / metadata.chunkSize);
+      const endPartNumber = Math.ceil(end / metadata.chunkSize);
       const parts = urls.slice(startPartNumber, endPartNumber)
         .map((url) => ({ url }));
 
       if (parts.length > 0) {
-        parts[0].start = start % CHUNK_SIZE;
-        parts[parts.length - 1].end = end % CHUNK_SIZE;
+        parts[0].start = start % metadata.chunkSize;
+        parts[parts.length - 1].end = end % metadata.chunkSize;
       }
 
       res.status(206);
