@@ -4,7 +4,9 @@ Tele-Cloud is a modern Node.js file server that utilizes Telegram as a storage b
 
 <p align="center">
   <img src="https://img.shields.io/badge/node.js-18.x-brightgreen" alt="Node.js Version">
-  <img src="https://img.shields.io/badge/platform-docker%20%7C%20native-blue" alt="Platform">
+  <a href="https://hub.docker.com/r/mewthedev/tele-cloud">
+    <img alt="Docker Image Version" src="https://img.shields.io/docker/v/mewthedev/tele-cloud?label=docker%20image">
+  </a>
   <img src="https://img.shields.io/badge/license-MIT-orange" alt="License">
 </p>
 
@@ -67,6 +69,23 @@ docker-compose up -d
 
 # View logs
 docker-compose logs -f
+```
+
+#### Option 3: Docker Hub Image
+
+The application is also available as a pre-built Docker image on Docker Hub:
+
+```bash
+# Pull the image from Docker Hub
+docker pull mewthedev/tele-cloud:latest
+
+# Run the container
+docker run -d \
+  -p 3333:3333 \
+  -e TELEGRAM_BOT_TOKEN=your_telegram_bot_token \
+  -e TELEGRAM_CHAT_ID=your_telegram_chat_id \
+  --name tele-cloud \
+  mewthedev/tele-cloud:latest
 ```
 
 ## 📡 API Reference
@@ -166,7 +185,7 @@ The included Docker configuration offers:
 
 ```javascript
 async function uploadFile(file) {
-  const chunkSize = 50 * 1024 * 1024; // 10MB
+  const chunkSize = 10 * 1024 * 1024; // 10MB
   const fileId = generateRandomId();
   const totalChunks = Math.ceil(file.size / chunkSize);
   let deleteToken = null;
@@ -182,7 +201,7 @@ async function uploadFile(file) {
     formData.append('chunkIndex', i);
     formData.append('totalChunks', totalChunks);
     
-    const response = await fetch('http://localhost:3000/u', {
+    const response = await fetch('http://localhost:3333/u', {
       method: 'POST',
       body: formData
     });
@@ -208,7 +227,7 @@ function generateRandomId() {
 
 ```javascript
 async function deleteFile(fileId, deleteToken) {
-  const response = await fetch(`http://localhost:3000/${fileId}`, {
+  const response = await fetch(`http://localhost:3333/${fileId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
